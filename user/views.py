@@ -1,5 +1,5 @@
 
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,UpdateAPIView
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .models import (
     CustomUser,CodeVerify,NEW,
@@ -7,7 +7,7 @@ from .models import (
     VIA_EMAIL,VIA_PHONE
 
     )
-from .serializers import SingUpSerializers
+from .serializers import SingUpSerializers,UserChangeInfoSerializers
 from rest_framework.views import APIView
 from datetime import timedelta,datetime
 from rest_framework.exceptions import ValidationError
@@ -64,4 +64,27 @@ class GetNewCode(APIView):
             'message':'Kodingiz yuborildi 2 minut vaqtizdan keyin ishlamaydi'
         }
         return Response(response)
+
+
+class UserChangeInfoView(UpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = UserChangeInfoSerializers
+    queryset = CustomUser
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        serializer=self.get_serializer(self.get_object(),data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        response={
+                "status": status.HTTP_201_CREATED,
+                "message": "Siz muvaffaqiyatli ro'yxatdan o'tdiz!"
+            },
+        return Response(response)
+
+
+
+
 

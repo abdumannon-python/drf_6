@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from .models import CustomUser
 from shared.utility import check_email_or_phone
-from .models import VIA_PHONE,VIA_EMAIL
+from .models import (
+    VIA_PHONE,VIA_EMAIL,
+    CODE_VERIFY,DONE
+                     )
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from django.db.models import Q
@@ -86,10 +89,11 @@ class UserChangeInfoSerializers(serializers.Serializer):
         password=attrs.get('password')
         conf_password=attrs.get('conf_password')
 
-        if not password!=conf_password:
+        if  password!=conf_password:
             raise ValidationError({'message':'parollar mos emas'})
         elif len(password)<7:
             raise ValidationError({'message':'parol 8 ta belgidan kam bolmasligi kerak'})
+        return attrs
 
 
     def validate_username(self,username):
@@ -111,13 +115,25 @@ class UserChangeInfoSerializers(serializers.Serializer):
 
          if len(first_name)<3:
              raise ValidationError({'message':"first_name kamida 4 ta belgi bo'lishi kerak"})
-         elif not first_name.isdigit():
+         elif first_name.isdigit():
              raise ValidationError({'message':'first_name ortiqcha belig bolmasligi kerak'})
          elif not first_name.isalnum():
              raise ValidationError({'message': 'first_name da ortiqcha belgi bolmasligi kerak '})
+         return first_name
+    def update(self, instance, validated_data):
+        validated_data.pop('conf_password')
+        instance.username=validated_data.get('username')
+        instance.first_name=validated_data.get('first_name')
+        instance.last_name=validated_data.get('last_name')
+        password=validated_data.get('password')
+        instance.set_password(password)
+        print(instance.auth_status, '================')
+        if instance.auth_status!=CODE_VERIFY:
+            raise ValidationError({'message':'siz hali tasdiqlanmagansiz'})
 
-
-
+        instance.auth_status=DONE
+        instance.save()
+        return instance
 
 
 
