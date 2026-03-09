@@ -57,7 +57,6 @@ class SingUpSerializers(serializers.ModelSerializer):
         user = CustomUser.objects.create(**validated_data)
         if user.auth_type==VIA_EMAIL:
             code=send_email(user)
-            print(code,'eeeeeeeeeeee')
         elif user.auth_type==VIA_PHONE:
             code=user.generate_code(VIA_PHONE)
             print(code,'ppppppppppppppppppppppp')
