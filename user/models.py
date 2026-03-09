@@ -98,7 +98,7 @@ class CodeVerify(BasModel):
     (VIA_EMAIL,VIA_EMAIL),
     (VIA_PHONE,VIA_PHONE)
     )
-    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='verify_codes')
     code=models.CharField(max_length=4)
     verify_type=models.CharField(max_length=30,choices=VERIFY_TYPE)
     expiration_time=models.DateTimeField()

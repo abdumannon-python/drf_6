@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.core.mail import send_mail
 from user.models import CodeVerify,CustomUser,VIA_EMAIL
 from datetime import datetime

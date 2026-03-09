@@ -73,3 +73,51 @@ class SingUpSerializers(serializers.ModelSerializer):
         data['access'] =instance.token()['access']
         return data
 
+
+class UserChangeInfoSerializers(serializers.Serializer):
+    first_name=serializers.CharField(required=True)
+    last_name=serializers.CharField(required=True)
+    username=serializers.CharField(required=True)
+    password=serializers.CharField(required=True)
+    conf_password=serializers.CharField(required=True)
+
+
+    def validate(self,attrs):
+        password=attrs.get('password')
+        conf_password=attrs.get('conf_password')
+
+        if not password!=conf_password:
+            raise ValidationError({'message':'parollar mos emas'})
+        elif len(password)<7:
+            raise ValidationError({'message':'parol 8 ta belgidan kam bolmasligi kerak'})
+
+
+    def validate_username(self,username):
+        user_query = CustomUser.objects.filter(username=username)
+
+        if self.instance:
+            user_query = user_query.exclude(pk=self.instance.pk)
+        if user_query.exists():
+            raise ValidationError({'message': 'Bu username band'})
+        if len(username) < 6:
+            raise ValidationError({'message': 'Username kamida 7 belgidan iborat bolishi kerek'})
+        elif not username.isalnum():
+            raise ValidationError({'message': 'username da ortiqcha belgi bolmasligi kerak '})
+        elif username[0].isdigit():
+            raise ValidationError({'message': 'username raqam bilan boshlanmasin '})
+        return username
+
+    def validate_first_name(self,first_name):
+
+         if len(first_name)<3:
+             raise ValidationError({'message':"first_name kamida 4 ta belgi bo'lishi kerak"})
+         elif not first_name.isdigit():
+             raise ValidationError({'message':'first_name ortiqcha belig bolmasligi kerak'})
+         elif not first_name.isalnum():
+             raise ValidationError({'message': 'first_name da ortiqcha belgi bolmasligi kerak '})
+
+
+
+
+
+
